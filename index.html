@@ -1,0 +1,2237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home Comfort - Суточная аренда квартир в Астане</title>
+  <meta name="description" content="Суточная аренда 6 проверенных квартир: онлайн бронирование, календарь занятости, оплата, отзывы, карта и поддержка 24/7.">
+  <meta name="keywords" content="суточная аренда, квартиры посуточно, Астана, booking apartment, short term rental">
+  <meta name="author" content="Home Comfort">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://homecomfort.example/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Home Comfort - Суточная аренда квартир">
+  <meta property="og:description" content="Профессиональный сервис посуточной аренды: фото, цены, календарь занятости, онлайн-бронирование.">
+  <meta property="og:url" content="https://homecomfort.example/">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=80&fm=webp">
+  <meta property="og:site_name" content="Home Comfort">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Home Comfort - Суточная аренда квартир">
+  <meta name="twitter:description" content="Бронирование квартир по дням с прозрачными ценами и красивым интерфейсом.">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=80&fm=webp">
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="icon" href="./icons/home-comfort-icon.svg" type="image/svg+xml">
+
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+  <style>
+    :root {
+      --bg: #f6f2e9;
+      --surface: rgba(255, 255, 255, 0.9);
+      --text: #132033;
+      --muted: #5f6d7f;
+      --line: rgba(19, 32, 51, 0.12);
+      --brand: #0f766e;
+      --brand-2: #14b8a6;
+      --accent: #d97706;
+      --danger: #dc2626;
+      --ok: #15803d;
+      --radius: 18px;
+      --shadow: 0 12px 36px rgba(19, 32, 51, 0.12);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", Tahoma, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(20, 184, 166, 0.2), transparent 30%),
+        radial-gradient(circle at top right, rgba(217, 119, 6, 0.2), transparent 25%),
+        var(--bg);
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font: inherit; }
+
+    .container {
+      width: min(1300px, calc(100% - 24px));
+      margin: 12px auto 28px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 12px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.6);
+      backdrop-filter: blur(14px);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .logo { font-weight: 800; display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: block;
+      flex: 0 0 42px;
+      object-fit: contain;
+      background: rgba(255, 255, 255, 0.55);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+    }
+
+    .nav { display: flex; flex-wrap: wrap; gap: 8px; }
+    .nav button, .btn {
+      border: 0;
+      border-radius: 12px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .nav button { background: transparent; color: var(--muted); font-weight: 600; }
+    .nav button.active, .nav button:hover { background: rgba(15,118,110,0.12); color: var(--brand); }
+
+    .btn-primary { background: linear-gradient(135deg, var(--brand), var(--brand-2)); color: #fff; font-weight: 700; }
+    .btn-ghost { background: #fff; border: 1px solid var(--line); }
+    .btn-danger { background: rgba(220,38,38,0.12); color: var(--danger); }
+    .btn-warning { background: rgba(217,119,6,0.14); color: #b45309; }
+
+    .hero {
+      margin-top: 14px;
+      border-radius: 28px;
+      overflow: hidden;
+      padding: 24px;
+      color: #fff;
+      background: linear-gradient(135deg, #0f766e, #155e75 60%, #d97706);
+      box-shadow: var(--shadow);
+    }
+
+    .hero h1 { font-size: clamp(2rem, 4vw, 4rem); line-height: 1; margin-bottom: 12px; }
+    .hero p { max-width: 760px; opacity: .95; margin-bottom: 14px; }
+
+    .grid { display: grid; gap: 14px; }
+    .cards-3 { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .cards-2 { grid-template-columns: repeat(2, minmax(0,1fr)); }
+
+    .panel {
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255,255,255,0.6);
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    .section { display: none; margin-top: 16px; }
+    .section.active { display: block; }
+    .section h2 { margin: 0 0 10px; }
+    .muted { color: var(--muted); }
+
+    .filters { display: grid; grid-template-columns: 1.7fr repeat(4, 1fr); gap: 10px; }
+    .field { display: grid; gap: 6px; }
+    .field input, .field select, .field textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: #fff;
+    }
+
+    .apartment {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 14px;
+      min-height: 360px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #fff;
+      border: 1px solid var(--line);
+    }
+
+    .ap-media { padding: 12px; background: #f8fafc; display: grid; }
+    .ap-gallery { margin-top: 12px; }
+
+    .ap-media-row {
+      display: grid;
+      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      gap: 12px;
+      max-width: none;
+      margin: 0;
+      align-items: stretch;
+    }
+    .ap-video-box {
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #0b1220;
+      min-height: 220px;
+    }
+    .ap-video-box video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .ap-photo-box .carousel-lg .carousel-slide { min-height: 220px; }
+
+    .ap-media-row.ap-media-row-square {
+      grid-template-columns: repeat(2, minmax(0, 260px));
+      justify-content: flex-start;
+      max-width: none;
+    }
+    .ap-media-row.ap-media-row-square .ap-video-box,
+    .ap-media-row.ap-media-row-square .ap-photo-box .carousel {
+      min-height: 0;
+      aspect-ratio: 1 / 1;
+      height: auto;
+    }
+    .ap-media-row.ap-media-row-square .carousel-track,
+    .ap-media-row.ap-media-row-square .carousel-slide,
+    .ap-media-row.ap-media-row-square .carousel-slide img,
+    .ap-media-row.ap-media-row-square .ap-video-box video {
+      height: 100%;
+    }
+    .ap-media-row.ap-media-row-square .carousel-slide,
+    .ap-media-row.ap-media-row-square .ap-photo-box .carousel-lg .carousel-slide {
+      min-height: 0;
+    }
+
+    .carousel {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: #0b1220;
+      height: 100%;
+    }
+    .carousel-track {
+      display: flex;
+      height: 100%;
+      transition: transform .35s ease;
+      will-change: transform;
+    }
+    .carousel-slide {
+      min-width: 100%;
+      min-height: 260px;
+      cursor: pointer;
+    }
+    .carousel-slide img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .carousel-md .carousel-slide { min-height: 300px; }
+    .carousel-lg .carousel-slide { min-height: 420px; }
+
+    .carousel-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: rgba(11, 18, 32, 0.55);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .carousel-btn.prev { left: 10px; }
+    .carousel-btn.next { right: 10px; }
+
+    .carousel-dots {
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      transform: translateX(-50%);
+      z-index: 2;
+      display: flex;
+      gap: 6px;
+      padding: 6px 8px;
+      border-radius: 999px;
+      background: rgba(11, 18, 32, 0.45);
+    }
+    .carousel-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      border: 0;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.5);
+    }
+    .carousel-dot.active { background: #fff; }
+
+    .carousel-progress {
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: 44px;
+      z-index: 2;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.28);
+      overflow: hidden;
+    }
+    .carousel-progress-fill {
+      width: 100%;
+      height: 100%;
+      transform-origin: left center;
+      transform: scaleX(0);
+      background: linear-gradient(90deg, #14b8a6, #f59e0b);
+      transition: transform 120ms linear;
+    }
+
+    .shot {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      min-height: 120px;
+      cursor: pointer;
+      border: 1px solid var(--line);
+    }
+    .shot img { width: 100%; height: 100%; object-fit: cover; }
+
+    .pill { display: inline-flex; gap: 6px; padding: 5px 10px; border-radius: 999px; background: rgba(19,32,51,0.08); font-size: .85rem; }
+
+    .ap-copy { padding: 14px; display: grid; gap: 10px; }
+
+    .price-line {
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(15,118,110,0.1);
+      border-radius: 12px; padding: 10px 12px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0,1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .cal-head { text-align: center; font-size: .8rem; color: var(--muted); font-weight: 700; }
+    .day {
+      min-height: 44px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #fff;
+      cursor: pointer;
+      font-size: .85rem;
+      display: grid;
+      place-items: center;
+    }
+    .day.booked { background: rgba(220,38,38,0.15); color: var(--danger); cursor: not-allowed; }
+    .day.blocked { background: rgba(217,119,6,0.2); color: #b45309; cursor: not-allowed; }
+    .day.selected { background: rgba(15,118,110,0.18); color: var(--brand); }
+    .day.past { opacity: .5; cursor: not-allowed; }
+
+    .map-wrap { min-height: 380px; border-radius: 14px; overflow: hidden; border: 1px solid var(--line); }
+
+    .table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+    .table th, .table td { border-bottom: 1px solid var(--line); padding: 8px; text-align: left; }
+
+    .modal {
+      position: fixed; inset: 0;
+      background: rgba(10,18,30,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 80;
+      padding: 14px;
+    }
+    .modal.open { display: flex; }
+    .modal-body {
+      width: min(1100px, 100%);
+      max-height: 90vh;
+      overflow: auto;
+      background: #fff;
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .lightbox-img {
+      width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #0b1220;
+    }
+
+    .chat-toggle {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 60;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .chat {
+      position: fixed;
+      right: 18px;
+      bottom: 70px;
+      width: min(360px, calc(100% - 24px));
+      height: 460px;
+      z-index: 61;
+      display: none;
+      grid-template-rows: auto 1fr auto;
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .chat.open { display: grid; }
+    .chat-head { padding: 10px 12px; background: #f8fafc; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
+    .chat-log { padding: 10px; overflow: auto; display: grid; gap: 8px; background: #fcfcfd; }
+    .msg { padding: 8px 10px; border-radius: 10px; max-width: 85%; font-size: .9rem; }
+    .msg.bot { background: #eef2f7; }
+    .msg.me { margin-left: auto; background: rgba(15,118,110,0.14); }
+    .chat-form { display: grid; grid-template-columns: 1fr auto; gap: 8px; padding: 8px; border-top: 1px solid var(--line); }
+
+    .toast-wrap { position: fixed; right: 10px; top: 10px; z-index: 100; display: grid; gap: 8px; }
+    .toast { background: #132033; color: #fff; padding: 10px 12px; border-radius: 10px; }
+
+    @media (max-width: 1000px) {
+      .cards-3, .cards-2, .filters, .apartment { grid-template-columns: 1fr; }
+      .topbar { border-radius: 16px; }
+      .ap-media-row { grid-template-columns: 1fr; max-width: none; }
+      .ap-media-row.ap-media-row-square { grid-template-columns: 1fr; }
+      .ap-video-box,
+      .ap-photo-box .carousel-lg .carousel-slide { min-height: 190px; }
+      .carousel-md .carousel-slide,
+      .carousel-lg .carousel-slide { min-height: 260px; }
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"LodgingBusiness",
+    "name":"Home Comfort",
+    "description":"Сервис посуточной аренды квартир с онлайн-бронированием",
+    "telephone":"+77001929260",
+    "areaServed":"Astana",
+    "url":"https://homecomfort.example/"
+  }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="logo">
+        <img class="logo-icon" src="./icons/home-comfort-icon.svg" alt="Home Comfort">
+        <div>
+          <div>Home Comfort</div>
+          <small class="muted" id="brandTagline">Суточная аренда квартир</small>
+        </div>
+      </div>
+      <nav class="nav" id="nav"></nav>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <select id="langSwitcher" class="btn btn-ghost" aria-label="Language">
+          <option value="ru">RU</option>
+          <option value="kz">KZ</option>
+          <option value="en">EN</option>
+        </select>
+        <a class="btn btn-ghost" id="chatOpenBtn" href="https://wa.me/77001929260" target="_blank" rel="noreferrer">WhatsApp</a>
+        <button class="btn btn-primary" id="authBtn">Профиль</button>
+      </div>
+    </header>
+
+    <section id="home" class="section active"></section>
+    <section id="catalog" class="section"></section>
+    <section id="apartmentPage" class="section"></section>
+    <section id="dashboard" class="section"></section>
+    <section id="profile" class="section"></section>
+    <section id="owner" class="section"></section>
+    <section id="about" class="section"></section>
+  </div>
+
+  <a class="chat-toggle" id="chatFab" href="https://wa.me/77001929260" target="_blank" rel="noreferrer">WhatsApp</a>
+  <aside class="chat" id="chatWidget">
+    <div class="chat-head">
+      <strong id="chatTitle">Онлайн-чат</strong>
+      <button class="btn btn-ghost" id="chatCloseBtn">Закрыть</button>
+    </div>
+    <div class="chat-log" id="chatLog"></div>
+    <form class="chat-form" id="chatForm">
+      <input id="chatInput" placeholder="Напишите вопрос...">
+      <button class="btn btn-primary" id="chatSendBtn" type="submit">Отправить</button>
+    </form>
+  </aside>
+
+  <div class="modal" id="lightboxModal">
+    <div class="modal-body">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <strong id="lightboxTitle">Фото</strong>
+        <button class="btn btn-ghost" id="lightboxClose">Закрыть</button>
+      </div>
+      <img id="lightboxImage" class="lightbox-img" alt="Apartment photo">
+      <div style="display:flex; justify-content:space-between; margin-top:10px;">
+        <button class="btn btn-ghost" id="lightboxPrev">Назад</button>
+        <button class="btn btn-ghost" id="lightboxNext">Вперёд</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="authModal">
+    <div class="modal-body" style="width:min(520px,100%);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <strong id="authModalTitle">Вход и регистрация</strong>
+        <button class="btn btn-ghost" id="authClose">Закрыть</button>
+      </div>
+      <div class="grid cards-2" style="margin-bottom:12px;">
+        <button class="btn btn-ghost" id="tabLogin">Вход</button>
+        <button class="btn btn-ghost" id="tabRegister">Регистрация</button>
+      </div>
+      <div id="authContent"></div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toasts"></div>
+
+  <script>
+    const STORAGE = 'staydaily-v3';
+    const LANG_STORAGE = 'staydaily-lang';
+    const SUPPORTED_LANGS = ['ru', 'kz', 'en'];
+
+    const I18N = {
+      ru: {
+        navHome: 'Главная', navCatalog: 'Квартиры', navDashboard: 'Кабинет', navOwner: 'Панель управления', navAbout: 'О нас',
+        brandTagline: 'Суточная аренда квартир', chat: 'Чат', onlineChat: 'Онлайн-чат', close: 'Закрыть', send: 'Отправить', profile: 'Профиль',
+        questionPlaceholder: 'Напишите вопрос...', prev: 'Назад', next: 'Вперёд',
+        heroTitle: 'Суточные квартиры, которые выглядят как отельный уровень',
+        heroText: 'Реальные фото, прозрачный календарь, динамические цены по сезонам, верификация гостей и моментальный контакт в чате + WhatsApp.',
+        viewApartments: 'Смотреть квартиры',
+        topApartments: 'Топ квартиры',
+        catalogTitle: 'Каталог квартир', search: 'Поиск', price: 'Цена', rooms: 'Комнат', sorting: 'Сортировка', action: 'Действие', apply: 'Применить',
+        any: 'Любая', anyRooms: 'Любые', popularSort: 'По популярности', ratingSort: 'По рейтингу',
+        fromNights: 'От {n} ночи', basePriceNight: 'базовая цена / ночь (динамика по датам)',
+        inFavorites: 'В избранном', addFavorite: 'В избранное', page: 'Страница', book: 'Бронировать',
+        rating: 'рейтинг', mapTitle: 'Локация на карте', mapText: 'Удобно для гостя: карта открывается прямо на странице квартиры.',
+        whatsapp: 'WhatsApp', backToCatalog: 'Назад в каталог', bookingTerm: 'Срок брони', views: 'Просмотров',
+        loginTitle: 'Вход и регистрация', loginTab: 'Вход', registerTab: 'Регистрация',
+        loginBtn: 'Войти', createAccount: 'Создать аккаунт', name: 'Имя', phone: 'Телефон', password: 'Пароль'
+      },
+      kz: {
+        navHome: 'Басты бет', navCatalog: 'Пәтерлер', navDashboard: 'Кабинет', navOwner: 'Басқару панелі', navAbout: 'Біз туралы',
+        brandTagline: 'Тәуліктік пәтер жалдау', chat: 'Чат', onlineChat: 'Онлайн чат', close: 'Жабу', send: 'Жіберу', profile: 'Профиль',
+        questionPlaceholder: 'Сұрағыңызды жазыңыз...', prev: 'Артқа', next: 'Келесі',
+        heroTitle: 'Қонақүй деңгейіндегі тәуліктік пәтерлер',
+        heroText: 'Нақты фото, ашық күнтізбе, маусымға сай динамикалық баға, қонақ верификациясы және чат + WhatsApp арқылы жедел байланыс.',
+        viewApartments: 'Пәтерлерді көру',
+        topApartments: 'Үздік пәтерлер',
+        catalogTitle: 'Пәтерлер каталогы', search: 'Іздеу', price: 'Баға', rooms: 'Бөлме', sorting: 'Сұрыптау', action: 'Әрекет', apply: 'Қолдану',
+        any: 'Кез келген', anyRooms: 'Кез келген', popularSort: 'Танымалдылық бойынша', ratingSort: 'Рейтинг бойынша',
+        fromNights: '{n} түннен', basePriceNight: 'негізгі баға / түн (күнге қарай өзгереді)',
+        inFavorites: 'Таңдаулыда', addFavorite: 'Таңдаулыға', page: 'Бет', book: 'Брондау',
+        rating: 'рейтинг', mapTitle: 'Картадағы орналасуы', mapText: 'Қонақ үшін ыңғайлы: карта пәтер бетінде ашылады.',
+        whatsapp: 'WhatsApp', backToCatalog: 'Каталогқа оралу', bookingTerm: 'Бронь мерзімі', views: 'Қаралым',
+        loginTitle: 'Кіру және тіркелу', loginTab: 'Кіру', registerTab: 'Тіркелу',
+        loginBtn: 'Кіру', createAccount: 'Аккаунт ашу', name: 'Аты', phone: 'Телефон', password: 'Құпиясөз'
+      },
+      en: {
+        navHome: 'Home', navCatalog: 'Apartments', navDashboard: 'Dashboard', navOwner: 'Owner Panel', navAbout: 'About',
+        brandTagline: 'Daily apartment rentals', chat: 'Chat', onlineChat: 'Online chat', close: 'Close', send: 'Send', profile: 'Profile',
+        questionPlaceholder: 'Type your question...', prev: 'Previous', next: 'Next',
+        heroTitle: 'Daily apartments with hotel-level quality',
+        heroText: 'Real photos, transparent calendar, dynamic seasonal pricing, guest verification, and instant contact via chat + WhatsApp.',
+        viewApartments: 'View apartments',
+        topApartments: 'Top apartments',
+        catalogTitle: 'Apartment catalog', search: 'Search', price: 'Price', rooms: 'Rooms', sorting: 'Sort', action: 'Action', apply: 'Apply',
+        any: 'Any', anyRooms: 'Any', popularSort: 'By popularity', ratingSort: 'By rating',
+        fromNights: 'From {n} nights', basePriceNight: 'base price / night (dynamic by date)',
+        inFavorites: 'In favorites', addFavorite: 'Add favorite', page: 'Page', book: 'Book now',
+        rating: 'rating', mapTitle: 'Map location', mapText: 'Convenient for guests: map opens right on the apartment page.',
+        whatsapp: 'WhatsApp', backToCatalog: 'Back to catalog', bookingTerm: 'Booking term', views: 'Views',
+        loginTitle: 'Sign in and registration', loginTab: 'Sign in', registerTab: 'Register',
+        loginBtn: 'Sign in', createAccount: 'Create account', name: 'Name', phone: 'Phone', password: 'Password'
+      }
+    };
+
+    function loadLanguage() {
+      const saved = localStorage.getItem(LANG_STORAGE);
+      return SUPPORTED_LANGS.includes(saved) ? saved : 'ru';
+    }
+
+    let currentLang = loadLanguage();
+
+    function t(key, vars = {}) {
+      const table = I18N[currentLang] || I18N.ru;
+      let value = table[key] || I18N.ru[key] || key;
+      Object.keys(vars).forEach((name) => {
+        value = value.replace(`{${name}}`, String(vars[name]));
+      });
+      return value;
+    }
+
+    function setLanguage(lang) {
+      if (!SUPPORTED_LANGS.includes(lang)) return;
+      currentLang = lang;
+      localStorage.setItem(LANG_STORAGE, lang);
+      renderAll();
+    }
+
+    const APARTMENTS = [
+      {
+        id: 'a1', slug: 'aynabulak-2-85-dom',
+        title: 'Айнабулак-2 85 дом', district: 'Алматы, Жетысуйский район, МК-Айнабулак-2, дом 85, 050014', coords: [43.319084, 76.916658],
+        basePrice: 24000, rooms: 2, guests: 4, area: 62, rating: 5, popularity: 118,
+        minStay: 2, blacklist: ['2026-06-15', '2026-06-16'],
+        description: 'Светлая двухкомнатная квартира в современном минимализме: отдельная спальня, уютная гостиная с ТВ, полностью укомплектованная кухня и аккуратная ванная с ванной и стиральной машиной. Панорамный вечерний вид на город, кондиционер, тихий интерьер и все для комфортного отдыха семьи или командировки.',
+        video: './video/85-video.mp4',
+        photos: [
+          { src: './image/85-15.jpeg', thumb: './image/85-15.jpeg', alt: 'Кухня и коридор квартиры Айнабулак-2 85 дом' },
+          { src: './image/85-17.jpeg', thumb: './image/85-17.jpeg', alt: 'Гостиная квартиры Айнабулак-2 85 дом, ракурс 2' },
+          { src: './image/85-18.jpeg', thumb: './image/85-18.jpeg', alt: 'Гостиная квартиры Айнабулак-2 85 дом, ракурс 3' },
+          { src: './image/85-20.jpeg', thumb: './image/85-20.jpeg', alt: 'Кухонная зона квартиры Айнабулак-2 85 дом' },
+          { src: './image/85-21.jpeg', thumb: './image/85-21.jpeg', alt: 'Зона отдыха квартиры Айнабулак-2 85 дом' },
+          { src: './image/85-22.jpeg', thumb: './image/85-22.jpeg', alt: 'Гостиная зона квартиры Айнабулак-2 85 дом' },
+          { src: './image/85-4.jpeg', thumb: './image/85-4.jpeg', alt: 'Спальня квартиры Айнабулак-2 85 дом' }
+        ]
+      },
+      {
+        id: 'a2', slug: 'city-nest-loft',
+        title: 'City Nest Loft', district: 'Алматы район', coords: [51.1580, 71.4704],
+        basePrice: 16800, rooms: 1, guests: 2, area: 46, rating: 4.8, popularity: 92,
+        minStay: 1, blacklist: ['2026-06-28'],
+        photos: [
+          { src: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Интерьер City Nest Loft' },
+          { src: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Зона отдыха City Nest Loft' },
+          { src: 'https://images.unsplash.com/photo-1486304873000-235643847519?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1486304873000-235643847519?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Рабочее место City Nest Loft' }
+        ]
+      },
+      {
+        id: 'a3', slug: 'family-courtyard',
+        title: 'Family Courtyard', district: 'Сарыарка', coords: [51.1717, 71.4047],
+        basePrice: 19500, rooms: 3, guests: 6, area: 96, rating: 4.85, popularity: 89,
+        minStay: 2, blacklist: ['2026-07-03', '2026-07-04'],
+        photos: [
+          { src: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Семейная гостиная Family Courtyard' },
+          { src: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Комната Family Courtyard' },
+          { src: 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Интерьер Family Courtyard' }
+        ]
+      },
+      {
+        id: 'a4', slug: 'business-avenue-suite',
+        title: 'Business Avenue Suite', district: 'Байконур', coords: [51.1281, 71.4308],
+        basePrice: 24500, rooms: 2, guests: 4, area: 82, rating: 4.95, popularity: 101,
+        minStay: 2, blacklist: ['2026-06-01'],
+        photos: [
+          { src: 'https://images.unsplash.com/photo-1464890100898-a385f744067f?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1464890100898-a385f744067f?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Зал Business Avenue Suite' },
+          { src: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Спальня Business Avenue Suite' },
+          { src: 'https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1472224371017-08207f84aaae?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Кухня Business Avenue Suite' }
+        ]
+      },
+      {
+        id: 'a5', slug: 'parkline-studio',
+        title: 'Parkline Studio', district: 'Ботанический сад', coords: [51.1021, 71.4519],
+        basePrice: 14900, rooms: 1, guests: 2, area: 39, rating: 4.7, popularity: 81,
+        minStay: 1, blacklist: [],
+        photos: [
+          { src: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Studio Parkline' },
+          { src: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Кухня Parkline' },
+          { src: 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Зона отдыха Parkline' }
+        ]
+      },
+      {
+        id: 'a6', slug: 'grand-horizon-residence',
+        title: 'Grand Horizon Residence', district: 'Центр', coords: [51.1662, 71.4468],
+        basePrice: 32000, rooms: 3, guests: 7, area: 128, rating: 5, popularity: 110,
+        minStay: 3, blacklist: ['2026-12-30', '2026-12-31'],
+        photos: [
+          { src: 'https://images.unsplash.com/photo-1616594039964-3d7ec1f8f8d7?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1616594039964-3d7ec1f8f8d7?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Холл Grand Horizon' },
+          { src: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Комната Grand Horizon' },
+          { src: 'https://images.unsplash.com/photo-1600566752227-8f3b2f5c5dcf?auto=format&fit=crop&w=1600&q=80&fm=webp', thumb: 'https://images.unsplash.com/photo-1600566752227-8f3b2f5c5dcf?auto=format&fit=crop&w=500&q=70&fm=webp', alt: 'Панорамный вид Grand Horizon' }
+        ]
+      }
+    ];
+
+    const PROMO_CODES = {
+      PROMO10: { type: 'percent', value: 10 },
+      WEEKEND5: { type: 'percent', value: 5 },
+      LONGSTAY15: { type: 'percent', value: 15, minNights: 5 },
+      FIX5000: { type: 'fixed', value: 5000 }
+    };
+
+    // POI инфраструктура рядом с каждой квартирой
+    const POI_BY_APARTMENT = {
+      a1: { metro: ['Айнабулак'], shops: ['Mag Shop', 'Carrefour'], cafes: ['Кофейня', 'Лапша-бар'], parking: 'подземный', pharmacy: 'Аптека 24/7' },
+      a2: { metro: ['Сарыарка'], shops: ['Евроопт', 'DIKSI'], cafes: ['Бар Lounge', 'Кекс'], parking: 'наземный', pharmacy: 'Фарминдекс' },
+      a3: { metro: ['Сарыарка'], shops: ['ТЦ Сарыарка'], cafes: ['Балхаш', 'Казбек'], parking: 'подземный', pharmacy: 'Аптека №1' },
+      a4: { metro: ['Байконур'], shops: ['ТЦ Байконур', 'Абай'], cafes: ['Клубный дом', 'Дастан'], parking: 'подземный', pharmacy: 'Мегаполис' },
+      a5: { metro: ['Ботанический сад'], shops: ['Оазис', 'Зелёный рай'], cafes: ['Сад кофе', 'Оазис'], parking: 'открытый', pharmacy: 'Green Health' },
+      a6: { metro: ['Центр'], shops: ['ТЦ Центр', 'Аружан'], cafes: ['Венеция', 'Tarte'], parking: 'подземный', pharmacy: 'Premium Pharma' }
+    };
+
+    function addViewHistory(apartmentId) {
+      state.viewHistory = state.viewHistory.filter((v) => v.id !== apartmentId);
+      state.viewHistory.unshift({ id: apartmentId, at: new Date().toISOString() });
+      if (state.viewHistory.length > 20) state.viewHistory = state.viewHistory.slice(0, 20);
+      saveState();
+    }
+
+    function getRecentlyViewed() {
+      return state.viewHistory.map((v) => APARTMENTS.find((a) => a.id === v.id)).filter(Boolean).slice(0, 6);
+    }
+
+    function getAvailableApartments(startDate, endDate, minGuests, maxPrice, districtFilter) {
+      const dates = rangeDates(startDate, endDate).map((d) => ymd(d));
+      return APARTMENTS.filter((a) => {
+        const guestMatch = a.guests >= minGuests;
+        const priceMatch = a.basePrice <= maxPrice;
+        const districtMatch = !districtFilter || a.district.toLowerCase().includes(districtFilter.toLowerCase());
+        const dateMatch = !dates.some((d) => a.blacklist.includes(d) || isDateBusy(a.id, d));
+        const stayMatch = dates.length >= a.minStay;
+        return guestMatch && priceMatch && districtMatch && dateMatch && stayMatch;
+      });
+    }
+
+    function getBestRecommendation(startDate, endDate, minGuests, maxPrice, districtFilter) {
+      const available = getAvailableApartments(startDate, endDate, minGuests, maxPrice, districtFilter);
+      if (!available.length) return null;
+      return available.sort((a, b) => b.rating - a.rating || b.popularity - a.popularity)[0];
+    }
+
+    const state = loadState();
+    let apartmentMapInstance = null;
+    let lightbox = { apartmentId: null, index: 0 };
+    const carouselState = {};
+    const carouselAutoPlayTimers = {};
+    const carouselProgressState = {};
+    const CAROUSEL_AUTO_MS = 5000;
+    const CAROUSEL_PROGRESS_STEP_MS = 100;
+
+    function defaultState() {
+      return {
+        users: [
+          { id: 'admin', role: 'admin', name: 'Admin', email: 'admin@staydaily.pro', password: 'demo123', phone: '+7 700 192 9260', referralCode: 'ADMIN01' },
+          { id: 'owner', role: 'owner', name: 'Owner', email: 'owner@staydaily.pro', password: 'demo123', phone: '+7 700 192 9260', referralCode: 'OWNER01' },
+          { id: 'guest', role: 'guest', name: 'Guest', email: 'guest@staydaily.pro', password: 'demo123', phone: '+7 700 555 0101', referralCode: 'GUEST01' }
+        ],
+        sessionUserId: null,
+        bookings: [],
+        favorites: {},
+        occupancy: {},
+        viewHistory: [],
+        chat: [{ from: 'bot', text: 'Здравствуйте! Я онлайн-помощник Home Comfort. Помогу выбрать квартиру или оформить бронь.' }],
+        analytics: { views: {}, leads: 0, visits: [], apartmentViews: [] },
+        seo: { indexable: true }
+      };
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE) || 'null');
+        const base = defaultState();
+        if (!saved || typeof saved !== 'object') return base;
+        return {
+          ...base,
+          ...saved,
+          users: Array.isArray(saved.users) && saved.users.length ? saved.users : base.users,
+          bookings: Array.isArray(saved.bookings) ? saved.bookings : base.bookings,
+          favorites: saved.favorites && typeof saved.favorites === 'object' ? saved.favorites : base.favorites,
+          viewHistory: Array.isArray(saved.viewHistory) ? saved.viewHistory : base.viewHistory,
+          chat: Array.isArray(saved.chat) && saved.chat.length ? saved.chat : base.chat,
+          analytics: saved.analytics && typeof saved.analytics === 'object'
+            ? {
+              ...base.analytics,
+              ...saved.analytics,
+              visits: Array.isArray(saved.analytics.visits) ? saved.analytics.visits : base.analytics.visits,
+              apartmentViews: Array.isArray(saved.analytics.apartmentViews) ? saved.analytics.apartmentViews : base.analytics.apartmentViews
+            }
+            : base.analytics,
+          occupancy: saved.occupancy && typeof saved.occupancy === 'object' ? saved.occupancy : base.occupancy
+        };
+      } catch (e) {
+        return defaultState();
+      }
+    }
+
+    function saveState() {
+      localStorage.setItem(STORAGE, JSON.stringify(state));
+    }
+
+    function user() {
+      return state.users.find((u) => u.id === state.sessionUserId) || null;
+    }
+
+    function fmtMoney(v) {
+      return new Intl.NumberFormat('ru-RU').format(Math.round(v)) + ' ₸';
+    }
+
+    function favoriteIdsForUser() {
+      const u = user();
+      if (!u) return [];
+      const list = state.favorites[u.id];
+      return Array.isArray(list) ? list : [];
+    }
+
+    function isFavorite(apartmentId) {
+      return favoriteIdsForUser().includes(apartmentId);
+    }
+
+    function toggleFavorite(apartmentId) {
+      const u = user();
+      if (!u) {
+        openAuth();
+        return;
+      }
+      const prev = favoriteIdsForUser();
+      const exists = prev.includes(apartmentId);
+      const next = exists ? prev.filter((id) => id !== apartmentId) : [...prev, apartmentId];
+      state.favorites[u.id] = next;
+      saveState();
+      renderCatalogList();
+      if ((location.hash || '').startsWith('#/apartment/')) {
+        const slug = location.hash.replace('#/apartment/', '');
+        renderApartmentPage(slug);
+      }
+      renderDashboard();
+      toast(exists ? 'Убрано из избранного' : 'Добавлено в избранное');
+    }
+
+    function toast(msg) {
+      const node = document.createElement('div');
+      node.className = 'toast';
+      node.textContent = msg;
+      document.getElementById('toasts').appendChild(node);
+      setTimeout(() => node.remove(), 3200);
+    }
+
+    function navItems() {
+      return [
+        { id: 'home', title: t('navHome') },
+        { id: 'catalog', title: t('navCatalog') },
+        { id: 'dashboard', title: t('navDashboard') },
+        { id: 'owner', title: t('navOwner') },
+        { id: 'about', title: t('navAbout') }
+      ];
+    }
+
+    function setActiveSection(id) {
+      document.querySelectorAll('.section').forEach((section) => section.classList.remove('active'));
+      const node = document.getElementById(id);
+      if (node) node.classList.add('active');
+      document.querySelectorAll('.nav button').forEach((btn) => btn.classList.toggle('active', btn.dataset.target === id));
+    }
+
+    function pushRoute(path) {
+      if (location.hash !== path) location.hash = path;
+    }
+
+    function resolveRoute() {
+      const hash = location.hash || '#/home';
+      if (hash.startsWith('#/apartment/')) {
+        const slug = hash.replace('#/apartment/', '');
+        renderApartmentPage(slug);
+        setActiveSection('apartmentPage');
+        return;
+      }
+
+      const target = hash.replace('#/', '');
+      if (['home', 'catalog', 'dashboard', 'profile', 'owner', 'about'].includes(target)) {
+        setActiveSection(target);
+      } else {
+        pushRoute('#/home');
+      }
+    }
+
+    function getApartmentBySlug(slug) {
+      return APARTMENTS.find((a) => a.slug === slug);
+    }
+
+    function viewApartment(apartment) {
+      pushRoute('#/apartment/' + apartment.slug);
+    }
+
+    function getVisitorId() {
+      let id = localStorage.getItem('staydaily-visitor-id');
+      if (!id) {
+        id = 'v-' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('staydaily-visitor-id', id);
+      }
+      return id;
+    }
+
+    function trackVisit(route) {
+      const u = user();
+      const visit = {
+        at: new Date().toISOString(),
+        route,
+        visitorId: getVisitorId(),
+        userId: u ? u.id : 'anon',
+        userName: u ? u.name : 'Аноним'
+      };
+      state.analytics.visits.unshift(visit);
+      if (state.analytics.visits.length > 500) state.analytics.visits.length = 500;
+      saveState();
+    }
+
+    function trackApartmentVisit(apartment) {
+      const u = user();
+      const event = {
+        at: new Date().toISOString(),
+        apartmentId: apartment.id,
+        apartmentTitle: apartment.title,
+        visitorId: getVisitorId(),
+        userId: u ? u.id : 'anon',
+        userName: u ? u.name : 'Аноним'
+      };
+      state.analytics.apartmentViews.unshift(event);
+      if (state.analytics.apartmentViews.length > 500) state.analytics.apartmentViews.length = 500;
+      addViewHistory(apartment.id);
+      saveState();
+    }
+
+    function carouselHtml(apartment, view, options = {}) {
+      const carouselId = `${view}-${apartment.id}`;
+      const photos = apartment.photos || [];
+      const includeVideo = Boolean(options.includeVideo && apartment.video);
+      const slides = includeVideo
+        ? [{ type: 'video', src: apartment.video, alt: apartment.title + ' видео' }, ...photos.map((p) => ({ type: 'photo', ...p }))]
+        : photos.map((p) => ({ type: 'photo', ...p }));
+      const index = Math.max(0, Math.min(carouselState[carouselId] || 0, Math.max(slides.length - 1, 0)));
+      carouselState[carouselId] = index;
+      const sizeClass = view === 'apartment' ? 'carousel-lg' : 'carousel-md';
+      const autoPlay = options.autoPlay !== false;
+      return `
+        <div class="carousel ${sizeClass}" data-carousel-id="${carouselId}" data-count="${slides.length}" data-index="${index}" data-autoplay="${autoPlay ? '1' : '0'}">
+          <div class="carousel-track" style="transform: translateX(-${index * 100}%);">
+            ${slides.map((slide, idx) => `
+              <div class="carousel-slide" ${slide.type === 'photo'
+                ? `onclick="${view === 'catalog' ? `viewApartmentBySlug('${apartment.slug}')` : `openLightbox('${apartment.id}', ${includeVideo ? idx - 1 : idx})`}"`
+                : ''}>
+                ${slide.type === 'video'
+                  ? `<video controls preload="metadata" style="width:100%; height:100%; object-fit:cover;" src="${slide.src}"></video>`
+                  : `<img src="${slide.thumb}" alt="${slide.alt}" loading="lazy" decoding="async" width="1200" height="800">`
+                }
+              </div>
+            `).join('')}
+          </div>
+          ${slides.length > 1 ? `
+            <div class="carousel-progress"><div class="carousel-progress-fill" data-carousel-progress-id="${carouselId}"></div></div>
+            <button class="carousel-btn prev" onclick="event.stopPropagation(); shiftCarousel('${carouselId}', -1)">‹</button>
+            <button class="carousel-btn next" onclick="event.stopPropagation(); shiftCarousel('${carouselId}', 1)">›</button>
+            <div class="carousel-dots">
+              ${slides.map((_, idx) => `<button class="carousel-dot ${idx === index ? 'active' : ''}" onclick="event.stopPropagation(); goToCarouselSlide('${carouselId}', ${idx})"></button>`).join('')}
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function shiftCarousel(carouselId, delta) {
+      const root = document.querySelector(`[data-carousel-id="${carouselId}"]`);
+      if (!root) return;
+      const count = Number(root.dataset.count || 0);
+      if (count <= 1) return;
+      const current = Number(root.dataset.index || 0);
+      const next = (current + delta + count) % count;
+      applyCarouselIndex(root, carouselId, next);
+      if (carouselAutoPlayTimers[carouselId]) resetCarouselProgress(carouselId);
+    }
+
+    function goToCarouselSlide(carouselId, index) {
+      const root = document.querySelector(`[data-carousel-id="${carouselId}"]`);
+      if (!root) return;
+      applyCarouselIndex(root, carouselId, index);
+      if (carouselAutoPlayTimers[carouselId]) resetCarouselProgress(carouselId);
+    }
+
+    function applyCarouselIndex(root, carouselId, index) {
+      const count = Number(root.dataset.count || 0);
+      if (!count) return;
+      const next = ((index % count) + count) % count;
+      root.dataset.index = String(next);
+      carouselState[carouselId] = next;
+      const track = root.querySelector('.carousel-track');
+      if (track) track.style.transform = `translateX(-${next * 100}%)`;
+      root.querySelectorAll('.carousel-dot').forEach((dot, idx) => {
+        dot.classList.toggle('active', idx === next);
+      });
+    }
+
+    function paintCarouselProgress(carouselId) {
+      const fill = document.querySelector(`[data-carousel-progress-id="${carouselId}"]`);
+      if (!fill) return;
+      const value = Math.max(0, Math.min(1, carouselProgressState[carouselId] || 0));
+      fill.style.transform = `scaleX(${value})`;
+    }
+
+    function resetCarouselProgress(carouselId) {
+      carouselProgressState[carouselId] = 0;
+      paintCarouselProgress(carouselId);
+    }
+
+    function stopCarouselAutoPlay(carouselId) {
+      if (!carouselAutoPlayTimers[carouselId]) return;
+      clearInterval(carouselAutoPlayTimers[carouselId]);
+      delete carouselAutoPlayTimers[carouselId];
+    }
+
+    function startCarouselAutoPlay(carouselId) {
+      stopCarouselAutoPlay(carouselId);
+      const root = document.querySelector(`[data-carousel-id="${carouselId}"]`);
+      if (!root) return;
+      if (root.dataset.autoplay === '0') return;
+      const count = Number(root.dataset.count || 0);
+      if (count <= 1) return;
+
+      resetCarouselProgress(carouselId);
+
+      carouselAutoPlayTimers[carouselId] = setInterval(() => {
+        const node = document.querySelector(`[data-carousel-id="${carouselId}"]`);
+        if (!node) {
+          stopCarouselAutoPlay(carouselId);
+          return;
+        }
+        if (node.matches(':hover')) return;
+        const step = CAROUSEL_PROGRESS_STEP_MS / CAROUSEL_AUTO_MS;
+        carouselProgressState[carouselId] = Math.min(1, (carouselProgressState[carouselId] || 0) + step);
+        paintCarouselProgress(carouselId);
+        if (carouselProgressState[carouselId] >= 1) {
+          shiftCarousel(carouselId, 1);
+          resetCarouselProgress(carouselId);
+        }
+      }, CAROUSEL_PROGRESS_STEP_MS);
+    }
+
+    function initCarousels() {
+      // Clear timers for carousels removed from DOM during rerender.
+      Object.keys(carouselAutoPlayTimers).forEach((carouselId) => {
+        if (!document.querySelector(`[data-carousel-id="${carouselId}"]`)) {
+          stopCarouselAutoPlay(carouselId);
+        }
+      });
+
+      document.querySelectorAll('.carousel').forEach((root) => {
+        const carouselId = root.dataset.carouselId;
+        if (!carouselId) return;
+
+        if (!root.dataset.inited) {
+          root.dataset.inited = '1';
+
+          let touchStartX = 0;
+          let touchStartY = 0;
+
+          root.addEventListener('touchstart', (event) => {
+            const touch = event.changedTouches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            stopCarouselAutoPlay(carouselId);
+          }, { passive: true });
+
+          root.addEventListener('touchend', (event) => {
+            const touch = event.changedTouches[0];
+            const dx = touch.clientX - touchStartX;
+            const dy = touch.clientY - touchStartY;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+              shiftCarousel(carouselId, dx > 0 ? -1 : 1);
+            }
+            startCarouselAutoPlay(carouselId);
+          }, { passive: true });
+
+          root.addEventListener('mouseenter', () => stopCarouselAutoPlay(carouselId));
+          root.addEventListener('mouseleave', () => startCarouselAutoPlay(carouselId));
+        }
+
+        startCarouselAutoPlay(carouselId);
+      });
+    }
+
+    function dynamicNightPrice(apartment, dateStr) {
+      const date = new Date(dateStr + 'T12:00:00');
+      const day = date.getDay();
+      const month = date.getMonth() + 1;
+      let multiplier = 1;
+      if (day === 5 || day === 6) multiplier += 0.15;
+      if ([6, 7, 8].includes(month)) multiplier += 0.2;
+      if ([12, 1, 2].includes(month)) multiplier += 0.15;
+      return apartment.basePrice * multiplier;
+    }
+
+    function rangeDates(start, end) {
+      const out = [];
+      let d = new Date(start + 'T12:00:00');
+      const e = new Date(end + 'T12:00:00');
+      while (d < e) {
+        out.push(new Date(d));
+        d.setDate(d.getDate() + 1);
+      }
+      return out;
+    }
+
+    function ymd(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      const d = String(date.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function isDateBusy(apartmentId, dateStr) {
+      const occ = state.occupancy[apartmentId] || {};
+      return occ[dateStr] || false;
+    }
+
+    function applyPromo(total, code, nights) {
+      if (!code) return { discount: 0, label: '' };
+      const normalized = code.toUpperCase().trim();
+      const promo = PROMO_CODES[normalized];
+      if (!promo) return { discount: 0, label: 'Промокод не найден' };
+      if (promo.minNights && nights < promo.minNights) return { discount: 0, label: `Промокод от ${promo.minNights} ночей` };
+      const discount = promo.type === 'fixed' ? promo.value : total * (promo.value / 100);
+      return { discount, label: `Промокод ${normalized}` };
+    }
+
+    function applyReferral(total, referralCode) {
+      if (!referralCode) return { discount: 0, label: '' };
+      const owner = state.users.find((u) => u.referralCode && u.referralCode.toUpperCase() === referralCode.toUpperCase());
+      if (!owner) return { discount: 0, label: 'Реферальный код не найден' };
+      return { discount: total * 0.07, label: `Реферал ${owner.referralCode}` };
+    }
+
+    function renderHome() {
+      const top = [...APARTMENTS].sort((a, b) => b.popularity - a.popularity).slice(0, 3);
+      const recent = getRecentlyViewed();
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const inWeek = new Date();
+      inWeek.setDate(inWeek.getDate() + 7);
+
+      document.getElementById('home').innerHTML = `
+        <div class="hero">
+          <h1>${t('heroTitle')}</h1>
+          <p>${t('heroText')}</p>
+          
+          <div class="panel" style="margin-top:16px; background:rgba(255,255,255,0.95); color:var(--text);">
+            <h3 style="margin-bottom:12px;">🔍 Умный поиск</h3>
+            <div class="grid cards-2" style="gap:10px; margin-bottom:12px;">
+              <div class="field"><label>Заезд</label><input id="homeSearchStart" type="date" value="${ymd(tomorrow)}"></div>
+              <div class="field"><label>Выезд</label><input id="homeSearchEnd" type="date" value="${ymd(inWeek)}"></div>
+              <div class="field"><label>Гостей</label><select id="homeSearchGuests"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5+</option></select></div>
+              <div class="field"><label>Бюджет, ₸</label><select id="homeSearchBudget"><option value="50000">до 50 000</option><option value="75000">до 75 000</option><option value="100000" selected>до 100 000</option><option value="150000">до 150 000</option><option value="999999">любой</option></select></div>
+              <div class="field"><label>Район</label><select id="homeSearchDistrict"><option value="">Все районы</option><option value="Айнабулак">Айнабулак</option><option value="Сарыарка">Сарыарка</option><option value="Байконур">Байконур</option><option value="Центр">Центр</option></select></div>
+              <div style="display:flex; align-items:flex-end;"><button class="btn btn-primary" onclick="doSmartSearch()" style="width:100%;">Найти</button></div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+            <a class="btn btn-ghost" href="https://wa.me/77001929260?text=Здравствуйте! Хочу подобрать квартиру" target="_blank" rel="noreferrer">WhatsApp +7 700 192 9260</a>
+          </div>
+        </div>
+
+        ${recent.length ? `
+          <div class="panel" style="margin-top:14px;">
+            <h2>📌 Вы смотрели</h2>
+            <div class="grid cards-3" style="margin-top:10px;">
+              ${recent.map((a) => `
+                <div class="panel">
+                  <div class="shot" onclick="viewApartmentBySlug('${a.slug}')">
+                    <img src="${a.photos[0].thumb}" alt="${a.photos[0].alt}" loading="lazy">
+                  </div>
+                  <h3 style="margin-top:8px;">${a.title}</h3>
+                  <p class="muted">${a.district}</p>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                    <button class="btn btn-ghost" onclick="viewApartmentBySlug('${a.slug}')">Продолжить</button>
+                    <button class="btn btn-primary" onclick="openBooking('${a.id}')">Бронировать</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="panel" style="margin-top:14px;">
+          <h2>⭐ Топ квартиры</h2>
+          <div class="grid cards-3" style="margin-top:10px;">
+            ${top.map((a) => `
+              <div class="panel">
+                <div class="shot" onclick="viewApartmentBySlug('${a.slug}')">
+                  <img src="${a.photos[0].thumb}" alt="${a.photos[0].alt}" loading="lazy">
+                </div>
+                <h3 style="margin-top:8px;">${a.title}</h3>
+                <p class="muted">${a.district}</p>
+                <div style="display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;">
+                  <span class="pill">⭐ ${a.rating}</span>
+                  <span class="pill">${a.rooms} комн.</span>
+                  <span class="pill">${a.guests} гостей</span>
+                </div>
+                <div class="price-line">
+                  <strong>${fmtMoney(a.basePrice)}</strong>
+                  <button class="btn btn-ghost" onclick="viewApartmentBySlug('${a.slug}')">Страница</button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function doSmartSearch() {
+      const start = document.getElementById('homeSearchStart')?.value;
+      const end = document.getElementById('homeSearchEnd')?.value;
+      const guests = Number(document.getElementById('homeSearchGuests')?.value || 2);
+      const budget = Number(document.getElementById('homeSearchBudget')?.value || 100000);
+      const district = document.getElementById('homeSearchDistrict')?.value || '';
+
+      if (!start || !end || end <= start) {
+        toast('Выберите корректные даты');
+        return;
+      }
+
+      const available = getAvailableApartments(start, end, guests, budget, district);
+      const best = getBestRecommendation(start, end, guests, budget, district);
+
+      if (!available.length) {
+        toast('К сожалению, нет доступных квартир по вашим критериям');
+        return;
+      }
+
+      // Сохраню параметры поиска и перейду в каталог с фильтрами
+      sessionStorage.setItem('smartSearchParams', JSON.stringify({ start, end, guests, budget, district }));
+      pushRoute('#/catalog');
+      renderCatalog();
+      // Применю фильтры в каталоге
+      setTimeout(() => {
+        document.getElementById('searchInput').value = district;
+        renderCatalogList();
+        if (best) {
+          toast(`Рекомендуем: ${best.title} за ${fmtMoney(best.basePrice)}/ночь`);
+        }
+      }, 100);
+    }
+
+    function renderCatalog() {
+      document.getElementById('catalog').innerHTML = `
+        <div class="panel">
+          <h2>${t('catalogTitle')}</h2>
+          <div class="filters" style="margin-top:8px;">
+            <div class="field"><label>${t('search')}</label><input id="searchInput" placeholder="Название или район"></div>
+            <div class="field"><label>${t('price')}</label><select id="priceFilter"><option value="all">${t('any')}</option><option value="15000">до 15 000</option><option value="22000">15 001 - 22 000</option><option value="25000">22 001 - 25 000</option><option value="999999">от 25 001</option></select></div>
+            <div class="field"><label>${t('rooms')}</label><select id="roomFilter"><option value="all">${t('anyRooms')}</option><option value="1">1</option><option value="2">2</option><option value="3">3+</option></select></div>
+            <div class="field"><label>${t('sorting')}</label><select id="sortFilter"><option value="popular">${t('popularSort')}</option><option value="rating">${t('ratingSort')}</option><option value="priceAsc">${t('price')} ↑</option><option value="priceDesc">${t('price')} ↓</option></select></div>
+            <div class="field"><label>${t('action')}</label><button class="btn btn-primary" onclick="renderCatalogList()">${t('apply')}</button></div>
+          </div>
+        </div>
+        <div id="catalogList" class="grid" style="margin-top:12px;"></div>
+      `;
+
+      ['searchInput','priceFilter','roomFilter','sortFilter'].forEach((id) => {
+        const node = document.getElementById(id);
+        node.addEventListener('input', renderCatalogList);
+        node.addEventListener('change', renderCatalogList);
+      });
+
+      renderCatalogList();
+    }
+
+    function renderCatalogList() {
+      const s = (document.getElementById('searchInput')?.value || '').toLowerCase();
+      const pf = document.getElementById('priceFilter')?.value || 'all';
+      const rf = document.getElementById('roomFilter')?.value || 'all';
+      const sf = document.getElementById('sortFilter')?.value || 'popular';
+
+      let list = APARTMENTS.filter((a) => {
+        const hay = (a.title + ' ' + a.district).toLowerCase();
+        const searchOk = !s || hay.includes(s);
+        let priceOk = true;
+        if (pf === '15000') priceOk = a.basePrice <= 15000;
+        if (pf === '22000') priceOk = a.basePrice > 15000 && a.basePrice <= 22000;
+        if (pf === '25000') priceOk = a.basePrice > 22000 && a.basePrice <= 25000;
+        if (pf === '999999') priceOk = a.basePrice > 25000;
+        let roomOk = true;
+        if (rf === '1') roomOk = a.rooms === 1;
+        if (rf === '2') roomOk = a.rooms === 2;
+        if (rf === '3') roomOk = a.rooms >= 3;
+        return searchOk && priceOk && roomOk;
+      });
+
+      if (sf === 'popular') list.sort((a,b) => b.popularity - a.popularity);
+      if (sf === 'rating') list.sort((a,b) => b.rating - a.rating);
+      if (sf === 'priceAsc') list.sort((a,b) => a.basePrice - b.basePrice);
+      if (sf === 'priceDesc') list.sort((a,b) => b.basePrice - a.basePrice);
+
+      document.getElementById('catalogList').innerHTML = list.map((a) => `
+        <article class="apartment" style="cursor:pointer;" onclick="viewApartmentBySlug('${a.slug}')">
+          <div class="ap-media">
+            ${carouselHtml(a, 'catalog')}
+          </div>
+          <div class="ap-copy">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              <span class="pill">${a.district}</span>
+              <span class="pill">⭐ ${a.rating}</span>
+              <span class="pill">${t('fromNights', { n: a.minStay })}</span>
+            </div>
+            <h3>${a.title}</h3>
+            <p class="muted">Площадь ${a.area} м², ${a.rooms} комнаты, до ${a.guests} гостей</p>
+            <div class="price-line">
+              <div>
+                <strong>${fmtMoney(a.basePrice)}</strong>
+                <div class="muted">${t('basePriceNight')}</div>
+              </div>
+              <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn btn-ghost" onclick="event.stopPropagation(); toggleFavorite('${a.id}')">${isFavorite(a.id) ? t('inFavorites') : t('addFavorite')}</button>
+                <button class="btn btn-ghost" onclick="event.stopPropagation(); viewApartmentBySlug('${a.slug}')">${t('page')}</button>
+                <button class="btn btn-primary" onclick="event.stopPropagation(); openBooking('${a.id}')">${t('book')}</button>
+              </div>
+            </div>
+          </div>
+        </article>
+      `).join('');
+
+      initCarousels();
+    }
+
+    function renderApartmentPage(slug) {
+      const a = getApartmentBySlug(slug);
+      if (!a) {
+        document.getElementById('apartmentPage').innerHTML = `<div class="panel"><h2>Квартира не найдена</h2><button class="btn btn-primary" onclick="pushRoute('#/catalog')">К каталогу</button></div>`;
+        return;
+      }
+
+      state.analytics.views[a.id] = (state.analytics.views[a.id] || 0) + 1;
+      saveState();
+
+      document.title = `${a.title} - Home Comfort`;
+      document.getElementById('apartmentPage').innerHTML = `
+        <div class="panel">
+          <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; align-items:center;">
+            <div>
+              <h2>${a.title}</h2>
+              <p class="muted">${a.district} · ${t('rating')} ${a.rating}</p>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-ghost" onclick="toggleFavorite('${a.id}')">${isFavorite(a.id) ? t('inFavorites') : t('addFavorite')}</button>
+              <button class="btn btn-primary" onclick="openBooking('${a.id}')">${t('book')}</button>
+            </div>
+          </div>
+          ${a.description ? `<p class="muted" style="margin-top:10px;">${a.description}</p>` : ''}
+          <div class="ap-gallery" style="margin-top:12px;">
+            ${apartmentMediaHtml(a)}
+          </div>
+          <div class="grid cards-2" style="margin-top:12px;">
+            <div class="panel"><strong>${fmtMoney(a.basePrice)}</strong><p class="muted">Базовая цена</p></div>
+            <div class="panel"><strong>${(state.analytics.views[a.id] || 0)}</strong><p class="muted">${t('views')}</p></div>
+          </div>
+
+          ${(() => {
+            const poi = POI_BY_APARTMENT[a.id];
+            if (!poi) return '';
+            return `
+              <div class="panel" style="margin-top:12px;">
+                <h3>🏘️ Инфраструктура рядом</h3>
+                <div style="margin-top:8px; display:grid; gap:8px; font-size:0.92rem;">
+                  ${a.id !== 'a1' ? `<div><strong>🚇 Метро:</strong> ${poi.metro.join(', ')}</div>` : ''}
+                  <div><strong>🛒 Магазины:</strong> ${poi.shops.join(', ')}</div>
+                  <div><strong>☕ Кафе:</strong> ${poi.cafes.join(', ')}</div>
+                  <div><strong>🅿️ Парковка:</strong> ${poi.parking}</div>
+                  <div><strong>💊 Аптека:</strong> ${poi.pharmacy}</div>
+                </div>
+              </div>
+            `;
+          })()}
+
+          <div class="panel" style="margin-top:12px;">
+            <h3>${t('mapTitle')}</h3>
+            <p class="muted">${t('mapText')}</p>
+            <div id="apartmentMap" class="map-wrap" style="margin-top:10px;"></div>
+          </div>
+
+        </div>
+      `;
+
+      initCarousels();
+
+      trackApartmentVisit(a);
+      setTimeout(() => renderApartmentMap(a), 20);
+    }
+
+    function renderApartmentMap(apartment) {
+      const canvas = document.getElementById('apartmentMap');
+      if (!canvas || !window.L) return;
+      if (apartmentMapInstance) apartmentMapInstance.remove();
+      apartmentMapInstance = window.L.map('apartmentMap', { center: apartment.coords, zoom: 14 });
+      window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(apartmentMapInstance);
+      const marker = window.L.marker(apartment.coords).addTo(apartmentMapInstance);
+      marker.bindPopup(`<strong>${apartment.title}</strong><br>${apartment.district}<br>${fmtMoney(apartment.basePrice)}`).openPopup();
+    }
+
+    function apartmentMediaHtml(apartment) {
+      if (!apartment.video) {
+        return carouselHtml(apartment, 'apartment', { includeVideo: false, autoPlay: true });
+      }
+      const isAynabulakCompact = apartment.slug === 'aynabulak-2-85-dom';
+      return `
+        <div class="ap-media-row ${isAynabulakCompact ? 'ap-media-row-square' : ''}">
+          <div class="ap-video-box">
+            <video controls preload="metadata" src="${apartment.video}"></video>
+          </div>
+          <div class="ap-photo-box">
+            ${carouselHtml(apartment, 'apartment', { includeVideo: false, autoPlay: true })}
+          </div>
+        </div>
+      `;
+    }
+
+    function findNextAvailableStart(apartment, nights, startDate) {
+      const probe = new Date(startDate + 'T12:00:00');
+      for (let i = 0; i < 365; i++) {
+        const candidate = new Date(probe);
+        candidate.setDate(candidate.getDate() + i);
+        const candidateStart = ymd(candidate);
+        const candidateEndDate = new Date(candidate);
+        candidateEndDate.setDate(candidateEndDate.getDate() + nights);
+        const candidateEnd = ymd(candidateEndDate);
+        const range = rangeDates(candidateStart, candidateEnd).map((d) => ymd(d));
+        const invalid = range.some((d) => apartment.blacklist.includes(d) || isDateBusy(apartment.id, d));
+        if (!invalid && range.length >= apartment.minStay) return { start: candidateStart, end: candidateEnd, dates: range };
+      }
+      return null;
+    }
+
+    function rebookOneClick(bookingId) {
+      const u = user();
+      if (!u || u.role !== 'guest') {
+        toast('Опция доступна в кабинете гостя.');
+        return;
+      }
+      const prev = state.bookings.find((b) => b.id === bookingId && b.userId === u.id);
+      if (!prev) {
+        toast('Исходная бронь не найдена');
+        return;
+      }
+      const apartment = APARTMENTS.find((a) => a.id === prev.apartmentId);
+      if (!apartment) {
+        toast('Квартира больше недоступна');
+        return;
+      }
+
+      const from = ymd(new Date());
+      const slot = findNextAvailableStart(apartment, Math.max(prev.nights, apartment.minStay), from);
+      if (!slot) {
+        toast('Не найдено свободного окна для быстрой повторной брони');
+        return;
+      }
+
+      const nightly = slot.dates.map((d) => dynamicNightPrice(apartment, d));
+      const total = nightly.reduce((s, v) => s + v, 0);
+      const booking = {
+        id: 'BK-' + Date.now(),
+        apartmentId: apartment.id,
+        userId: u.id,
+        name: u.name,
+        phone: u.phone,
+        email: u.email,
+        start: slot.start,
+        end: slot.end,
+        nights: slot.dates.length,
+        dates: slot.dates,
+        paymentMethod: prev.paymentMethod || 'card',
+        total,
+        promo: '',
+        referral: '',
+        verification: { sms: true, document: 'rebook-quick' },
+        createdAt: new Date().toISOString(),
+        source: 'one-click-rebook'
+      };
+
+      state.bookings.unshift(booking);
+      if (!state.occupancy[apartment.id]) state.occupancy[apartment.id] = {};
+      slot.dates.forEach((d) => { state.occupancy[apartment.id][d] = booking.name; });
+      state.analytics.leads += 1;
+      saveState();
+      renderDashboard();
+      renderOwner();
+      toast(`Повторная бронь создана: ${slot.start} - ${slot.end}`);
+    }
+
+    function renderDashboard() {
+      const u = user();
+      if (!u) {
+        document.getElementById('dashboard').innerHTML = `<div class="panel"><h2>Нужен вход</h2><button class="btn btn-primary" onclick="openAuth()">Войти</button></div>`;
+        return;
+      }
+
+      const myBookings = u.role === 'guest' ? state.bookings.filter((b) => b.userId === u.id) : state.bookings;
+      const revenue = state.bookings.reduce((sum, b) => sum + b.total, 0);
+      const favoriteApartments = favoriteIdsForUser().map((id) => APARTMENTS.find((a) => a.id === id)).filter(Boolean);
+
+      document.getElementById('dashboard').innerHTML = `
+        <div class="grid cards-3">
+          <div class="panel"><h3>${u.name}</h3><p class="muted">Ваш рефкод: <strong>${u.referralCode || '-'}</strong></p></div>
+          <div class="panel"><strong>${myBookings.length}</strong><p class="muted">Бронирований</p></div>
+          <div class="panel"><strong>${fmtMoney(revenue)}</strong><p class="muted">Оборот</p></div>
+        </div>
+
+        ${u.role === 'guest' ? `
+          <div class="panel" style="margin-top:12px;">
+            <h2>Мои любимые квартиры</h2>
+            <div class="grid cards-3" style="margin-top:10px;">
+              ${favoriteApartments.map((a) => `
+                <div class="panel">
+                  <div class="shot" onclick="viewApartmentBySlug('${a.slug}')"><img src="${a.photos[0].thumb}" alt="${a.photos[0].alt}" loading="lazy"></div>
+                  <h3 style="margin-top:8px;">${a.title}</h3>
+                  <p class="muted">${a.district}</p>
+                  <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                    <button class="btn btn-ghost" onclick="toggleFavorite('${a.id}')">Убрать</button>
+                    <button class="btn btn-primary" onclick="openBooking('${a.id}')">Бронировать</button>
+                  </div>
+                </div>
+              `).join('') || '<p class="muted">Пока нет избранных квартир. Добавьте их из каталога.</p>'}
+            </div>
+          </div>
+        ` : ''}
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>История бронирований и платежей</h2>
+          <div style="overflow:auto; margin-top:8px;">
+            <table class="table">
+              <thead><tr><th>ID</th><th>Квартира</th><th>Даты</th><th>Ночей</th><th>Оплата</th><th>Сумма</th><th>Гость</th></tr></thead>
+              <tbody>
+                ${myBookings.map((b) => {
+                  const a = APARTMENTS.find((x) => x.id === b.apartmentId);
+                  const quick = u.role === 'guest' ? `<button class="btn btn-ghost" onclick="rebookOneClick('${b.id}')">Повторить в 1 клик</button>` : '';
+                  return `<tr><td>${b.id}</td><td>${a ? a.title : b.apartmentId}</td><td>${b.start} - ${b.end}</td><td>${b.nights}</td><td>${b.paymentMethod}</td><td>${fmtMoney(b.total)}</td><td>${b.name}<div style="margin-top:6px;">${quick}</div></td></tr>`;
+                }).join('') || '<tr><td colspan="7">Нет данных</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+          ${(u.role === 'owner' || u.role === 'admin') ? `
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="exportCsv()">Экспорт CSV</button>
+              <button class="btn btn-ghost" onclick="exportXls()">Экспорт Excel (.xls)</button>
+            </div>
+          ` : ''}
+        </div>
+      `;
+    }
+
+    function renderOwner() {
+      const u = user();
+      if (!u) {
+        document.getElementById('owner').innerHTML = `<div class="panel"><h2>Панель управления</h2><p class="muted">Войдите в управляющий аккаунт.</p><button class="btn btn-primary" onclick="openAuth()">Войти</button></div>`;
+        return;
+      }
+      if (!['owner', 'admin'].includes(u.role)) {
+        document.getElementById('owner').innerHTML = `<div class="panel"><h2>Доступ ограничен</h2><p class="muted">Эта страница доступна только управляющему аккаунту.</p></div>`;
+        return;
+      }
+
+      const visits = state.analytics.visits || [];
+      const apartmentViews = state.analytics.apartmentViews || [];
+      const bookings = state.bookings || [];
+      const users = state.users || [];
+      const uniqueVisitors = new Set(visits.map((v) => v.visitorId)).size;
+      const conversion = uniqueVisitors ? ((bookings.length / uniqueVisitors) * 100).toFixed(1) : '0.0';
+
+      // Сводка по платежам: по пользователям и по квартирам
+      // Сумма по пользователям
+      const paymentsByUser = {};
+      bookings.forEach((b) => {
+        if (!paymentsByUser[b.userId]) paymentsByUser[b.userId] = { name: b.name, email: b.email, phone: b.phone, total: 0, count: 0 };
+        paymentsByUser[b.userId].total += b.total;
+        paymentsByUser[b.userId].count += 1;
+      });
+      // Сумма по квартирам
+      const paymentsByApartment = {};
+      bookings.forEach((b) => {
+        const a = APARTMENTS.find((x) => x.id === b.apartmentId);
+        const title = a ? a.title : b.apartmentId;
+        if (!paymentsByApartment[b.apartmentId]) paymentsByApartment[b.apartmentId] = { title, total: 0, count: 0 };
+        paymentsByApartment[b.apartmentId].total += b.total;
+        paymentsByApartment[b.apartmentId].count += 1;
+      });
+
+      document.getElementById('owner').innerHTML = `
+        <div class="grid cards-3">
+          <div class="panel"><strong>${visits.length}</strong><p class="muted">Всего входов на сайт</p></div>
+          <div class="panel"><strong>${uniqueVisitors}</strong><p class="muted">Уникальных посетителей</p></div>
+          <div class="panel"><strong>${conversion}%</strong><p class="muted">Конверсия в бронирование</p></div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>Кто заходит на сайт</h2>
+          <div style="overflow:auto; margin-top:8px;">
+            <table class="table">
+              <thead><tr><th>Время</th><th>Маршрут</th><th>Пользователь</th><th>Visitor ID</th></tr></thead>
+              <tbody>
+                ${visits.slice(0, 40).map((v) => `<tr><td>${new Date(v.at).toLocaleString('ru-RU')}</td><td>${v.route}</td><td>${v.userName}</td><td>${v.visitorId}</td></tr>`).join('') || '<tr><td colspan="4">Данных пока нет</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>Какие квартиры смотрят</h2>
+          <div style="overflow:auto; margin-top:8px;">
+            <table class="table">
+              <thead><tr><th>Время</th><th>Квартира</th><th>Пользователь</th><th>Visitor ID</th></tr></thead>
+              <tbody>
+                ${apartmentViews.slice(0, 40).map((v) => `<tr><td>${new Date(v.at).toLocaleString('ru-RU')}</td><td>${v.apartmentTitle}</td><td>${v.userName}</td><td>${v.visitorId}</td></tr>`).join('') || '<tr><td colspan="4">Данных пока нет</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>Пользователи сайта</h2>
+          <div style="overflow:auto; margin-top:8px;">
+            <table class="table">
+              <thead><tr><th>ID</th><th>Имя</th><th>Email</th><th>Телефон</th></tr></thead>
+              <tbody>
+                ${users.map((item) => `<tr><td>${item.id}</td><td>${item.name}</td><td>${item.email}</td><td>${item.phone || '-'}</td></tr>`).join('') || '<tr><td colspan="4">Пользователей пока нет</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>Бронирования</h2>
+          <div style="overflow:auto; margin-top:8px;">
+            <table class="table">
+              <thead><tr><th>ID</th><th>Квартира</th><th>Гость</th><th>Даты</th><th>Оплата</th><th>Сумма</th></tr></thead>
+              <tbody>
+                ${bookings.slice(0, 40).map((b) => {
+                  const a = APARTMENTS.find((x) => x.id === b.apartmentId);
+                  return `<tr><td>${b.id}</td><td>${a ? a.title : b.apartmentId}</td><td>${b.name}</td><td>${b.start} - ${b.end}</td><td>${b.paymentMethod}</td><td>${fmtMoney(b.total)}</td></tr>`;
+                }).join('') || '<tr><td colspan="6">Бронирований пока нет</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="exportCsv()">Экспорт CSV</button>
+            <button class="btn btn-ghost" onclick="exportXls()">Экспорт Excel (.xls)</button>
+          </div>
+          <div class="panel" style="margin-top:18px;">
+            <h3>Сводка по гостям</h3>
+            <table class="table">
+              <thead><tr><th>Гость</th><th>Email</th><th>Телефон</th><th>Сумма</th><th>Бронирований</th></tr></thead>
+              <tbody>
+                ${Object.values(paymentsByUser).map(u => `<tr><td>${u.name}</td><td>${u.email}</td><td>${u.phone || '-'}</td><td>${fmtMoney(u.total)}</td><td>${u.count}</td></tr>`).join('') || '<tr><td colspan="5">Нет данных</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+          <div class="panel" style="margin-top:18px;">
+            <h3>Сводка по квартирам</h3>
+            <table class="table">
+              <thead><tr><th>Квартира</th><th>Сумма</th><th>Бронирований</th></tr></thead>
+              <tbody>
+                ${Object.values(paymentsByApartment).map(a => `<tr><td>${a.title}</td><td>${fmtMoney(a.total)}</td><td>${a.count}</td></tr>`).join('') || '<tr><td colspan="3">Нет данных</td></tr>'}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProfile() {
+      const u = user();
+      if (!u) {
+        document.getElementById('profile').innerHTML = `<div class="panel"><h2>Профиль</h2><p class="muted">Чтобы открыть профиль, войдите или зарегистрируйтесь.</p><button class="btn btn-primary" onclick="openAuth('login')">Открыть вход</button></div>`;
+        return;
+      }
+
+      const favoriteApartments = favoriteIdsForUser().map((id) => APARTMENTS.find((a) => a.id === id)).filter(Boolean);
+      const myBookings = state.bookings.filter((b) => b.userId === u.id);
+
+      document.getElementById('profile').innerHTML = `
+        <div class="grid cards-3">
+          <div class="panel"><h3>${u.name}</h3><p class="muted">Личный профиль</p></div>
+          <div class="panel"><strong>${u.email}</strong><p class="muted">Email</p></div>
+          <div class="panel"><strong>${u.phone || '-'}</strong><p class="muted">Телефон</p></div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>Избранные квартиры</h2>
+          <div class="grid cards-3" style="margin-top:10px;">
+            ${favoriteApartments.map((a) => `
+              <div class="panel">
+                <div class="shot" onclick="viewApartmentBySlug('${a.slug}')"><img src="${a.photos[0].thumb}" alt="${a.photos[0].alt}" loading="lazy"></div>
+                <h3 style="margin-top:8px;">${a.title}</h3>
+                <p class="muted">${a.district}</p>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;">
+                  <button class="btn btn-ghost" onclick="toggleFavorite('${a.id}')">Убрать</button>
+                  <button class="btn btn-primary" onclick="openBooking('${a.id}')">Бронировать</button>
+                </div>
+              </div>
+            `).join('') || '<p class="muted">Вы пока не добавили квартиры в избранное.</p>'}
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px;">
+          <h2>Мои бронирования</h2>
+          <p class="muted">Активных и завершенных бронирований: ${myBookings.length}</p>
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-ghost" onclick="pushRoute('#/dashboard')">Открыть кабинет бронирований</button>
+            <button class="btn btn-danger" onclick="logout()">Выйти из профиля</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAbout() {
+      document.getElementById('about').innerHTML = `
+        <div class="panel">
+          <h2>О сервисе</h2>
+          <p class="muted">Home Comfort - сервис суточной аренды с акцентом на честные цены, визуальную прозрачность и контроль занятости.</p>
+          <div class="grid cards-2" style="margin-top:10px;">
+            <div class="panel">
+              <h3>Что уже внедрено</h3>
+              <ul style="padding-left:18px; margin-top:8px; line-height:1.6;">
+                <li>Реальные фото + lightbox</li>
+                <li>SEO и OpenGraph</li>
+                <li>PWA (manifest + service worker)</li>
+                <li>Промокоды и реферальная скидка</li>
+                <li>Динамическое ценообразование</li>
+                <li>Минимальный срок + черные даты</li>
+                <li>Верификация SMS-кодом и документом</li>
+              </ul>
+            </div>
+            <div class="panel">
+              <h3>Контакты</h3>
+              <p style="margin-top:8px;">Онлайн-чат на сайте и WhatsApp: <a href="https://wa.me/77001929260" target="_blank" rel="noreferrer">+7 700 192 9260</a></p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNav() {
+      document.getElementById('nav').innerHTML = navItems().map((n) => `<button data-target="${n.id}" onclick="pushRoute('#/${n.id}')">${n.title}</button>`).join('');
+    }
+
+    function openLightbox(apartmentId, idx) {
+      lightbox = { apartmentId, index: idx };
+      drawLightbox();
+      document.getElementById('lightboxModal').classList.add('open');
+    }
+
+    function drawLightbox() {
+      const apartment = APARTMENTS.find((a) => a.id === lightbox.apartmentId);
+      if (!apartment) return;
+      const photo = apartment.photos[lightbox.index];
+      document.getElementById('lightboxTitle').textContent = apartment.title + ' - фото ' + (lightbox.index + 1) + '/' + apartment.photos.length;
+      document.getElementById('lightboxImage').src = photo.src;
+      document.getElementById('lightboxImage').alt = photo.alt;
+    }
+
+    function lightboxPrev() {
+      const apartment = APARTMENTS.find((a) => a.id === lightbox.apartmentId);
+      if (!apartment) return;
+      lightbox.index = (lightbox.index - 1 + apartment.photos.length) % apartment.photos.length;
+      drawLightbox();
+    }
+
+    function lightboxNext() {
+      const apartment = APARTMENTS.find((a) => a.id === lightbox.apartmentId);
+      if (!apartment) return;
+      lightbox.index = (lightbox.index + 1) % apartment.photos.length;
+      drawLightbox();
+    }
+
+    function openBooking(apartmentId) {
+      const u = user();
+      if (!u) {
+        openAuth();
+        return;
+      }
+
+      const apartment = APARTMENTS.find((a) => a.id === apartmentId);
+      const start = new Date();
+      start.setDate(start.getDate() + 1);
+      const end = new Date(start);
+      end.setDate(end.getDate() + apartment.minStay);
+
+      const panel = document.createElement('div');
+      panel.className = 'modal open';
+      panel.id = 'bookingModal';
+      panel.innerHTML = `
+        <div class="modal-body">
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+            <h3>Бронирование: ${apartment.title}</h3>
+            <button class="btn btn-ghost" onclick="document.getElementById('bookingModal').remove()">Закрыть</button>
+          </div>
+
+          <div class="panel" style="margin-top:10px;">
+            <strong>Как забронировать за 3 шага</strong>
+            <p class="muted" style="margin-top:6px;">1) Выберите даты и заполните контакты. 2) При желании введите промокод или рефкод. 3) Пройдите верификацию и подтвердите бронь.</p>
+          </div>
+
+          <div class="grid cards-2" style="margin-top:10px;">
+            <div class="panel">
+              <div class="field"><label>Имя</label><input id="bkName" value="${u.name}"></div>
+              <div class="field"><label>Телефон</label><input id="bkPhone" value="${u.phone}"></div>
+              <div class="field"><label>Email</label><input id="bkEmail" value="${u.email}"></div>
+              <div class="field"><label>Дата заезда</label><input id="bkStart" type="date" value="${ymd(start)}"></div>
+              <div class="field"><label>Дата выезда</label><input id="bkEnd" type="date" value="${ymd(end)}"></div>
+              <div class="field"><label>Промокод</label><input id="bkPromo" placeholder="PROMO10"></div>
+              <div class="field"><label>Реферальный код</label><input id="bkRef" placeholder="REFCODE"></div>
+              <div class="field"><label>Оплата</label><select id="bkPayment"><option value="card">Карта</option><option value="kaspi">Kaspi</option><option value="tinkoff">Tinkoff</option><option value="cash">Наличные при заезде</option></select></div>
+            </div>
+
+            <div class="panel">
+              <h4>Верификация гостя</h4>
+              <p class="muted">Для подтверждения брони нужен SMS-код и документ.</p>
+              <div class="field" style="margin-top:8px;"><label>SMS код</label><div style="display:flex; gap:8px;"><button class="btn btn-ghost" onclick="sendOtp()">Отправить код</button><input id="otpInput" placeholder="4 цифры"></div></div>
+              <div class="field"><label>Документ (фото/скан)</label><input id="docInput" type="file" accept="image/*,.pdf"></div>
+              <button class="btn btn-primary" style="margin-top:8px;" onclick="verifyGuest()">Подтвердить верификацию</button>
+              <p id="verifyStatus" class="muted" style="margin-top:8px;">Статус: не подтвержден</p>
+
+              <h4 style="margin-top:12px;">Календарь занятости</h4>
+              <div id="bookingCalendar"></div>
+              <div id="bookingCalc" style="margin-top:10px;"></div>
+              <p id="bookingReadiness" class="muted" style="margin-top:8px;"></p>
+              <button id="bookingConfirmBtn" class="btn btn-primary" style="margin-top:10px;" onclick="confirmBooking('${apartment.id}')" disabled>Подтвердить бронь</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(panel);
+      window.bookingContext = { apartmentId: apartment.id };
+      window.bookingVerification = { otp: null, verified: false, documentName: null };
+      renderBookingCalendar(apartment);
+      recalcBooking(apartment);
+      updateBookingReadiness(apartment);
+
+      ['bkName','bkPhone','bkEmail','bkStart','bkEnd','bkPromo','bkRef','bkPayment'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', () => {
+          renderBookingCalendar(apartment);
+          recalcBooking(apartment);
+          updateBookingReadiness(apartment);
+        });
+        document.getElementById(id).addEventListener('change', () => {
+          renderBookingCalendar(apartment);
+          recalcBooking(apartment);
+          updateBookingReadiness(apartment);
+        });
+      });
+    }
+
+    function bookingValidation(apartment) {
+      const name = document.getElementById('bkName')?.value.trim();
+      const phone = document.getElementById('bkPhone')?.value.trim();
+      const email = document.getElementById('bkEmail')?.value.trim();
+      const start = document.getElementById('bkStart')?.value;
+      const end = document.getElementById('bkEnd')?.value;
+
+      if (!name || !phone || !email) return { ok: false, message: 'Заполните имя, телефон и email.' };
+      if (!start || !end || end <= start) return { ok: false, message: 'Укажите корректный период заезда и выезда.' };
+
+      const dates = rangeDates(start, end).map((d) => ymd(d));
+      const nights = dates.length;
+      if (nights < apartment.minStay) return { ok: false, message: `Минимальный срок: ${apartment.minStay} ночи.` };
+      if (dates.some((d) => apartment.blacklist.includes(d))) return { ok: false, message: 'В выбранном периоде есть недоступные даты.' };
+      if (dates.some((d) => isDateBusy(apartment.id, d))) return { ok: false, message: 'Часть выбранных дат уже занята.' };
+      if (!window.bookingVerification || !window.bookingVerification.verified) return { ok: false, message: 'Пройдите верификацию (SMS + документ).' };
+      return { ok: true, message: 'Все готово. Можно подтверждать бронь.' };
+    }
+
+    function updateBookingReadiness(apartment) {
+      const node = document.getElementById('bookingReadiness');
+      const btn = document.getElementById('bookingConfirmBtn');
+      if (!node || !btn) return;
+      const result = bookingValidation(apartment);
+      node.textContent = result.message;
+      node.style.color = result.ok ? 'var(--ok)' : 'var(--danger)';
+      btn.disabled = !result.ok;
+      btn.style.opacity = result.ok ? '1' : '0.6';
+      btn.style.cursor = result.ok ? 'pointer' : 'not-allowed';
+    }
+
+    function renderBookingCalendar(apartment) {
+      const start = document.getElementById('bkStart')?.value;
+      const base = start ? new Date(start + 'T12:00:00') : new Date();
+      const monthStart = new Date(base.getFullYear(), base.getMonth(), 1);
+      const daysInMonth = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+      const firstWeekDay = (monthStart.getDay() + 6) % 7;
+      let html = '<div class="calendar">';
+      ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].forEach((d) => { html += `<div class="cal-head">${d}</div>`; });
+      for (let i = 0; i < firstWeekDay; i++) html += '<div class="day past"></div>';
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const d = new Date(base.getFullYear(), base.getMonth(), day);
+        const dateStr = ymd(d);
+        const today = ymd(new Date());
+        const isPast = dateStr < today;
+        const inBlacklist = apartment.blacklist.includes(dateStr);
+        const busy = isDateBusy(apartment.id, dateStr);
+
+        let cls = 'day';
+        if (isPast) cls += ' past';
+        else if (inBlacklist) cls += ' blocked';
+        else if (busy) cls += ' booked';
+
+        html += `<div class="${cls}" title="${dateStr}">${day}</div>`;
+      }
+      html += '</div>';
+      document.getElementById('bookingCalendar').innerHTML = html;
+    }
+
+    function recalcBooking(apartment) {
+      const start = document.getElementById('bkStart')?.value;
+      const end = document.getElementById('bkEnd')?.value;
+      if (!start || !end || end <= start) {
+        document.getElementById('bookingCalc').innerHTML = '<p class="muted">Выберите корректные даты.</p>';
+        return;
+      }
+
+      const dates = rangeDates(start, end);
+      const nights = dates.length;
+      const nightly = dates.map((d) => dynamicNightPrice(apartment, ymd(d)));
+      const subtotal = nightly.reduce((s, v) => s + v, 0);
+
+      const promo = applyPromo(subtotal, document.getElementById('bkPromo').value, nights);
+      const ref = applyReferral(subtotal, document.getElementById('bkRef').value);
+      const total = Math.max(0, subtotal - promo.discount - ref.discount);
+      const avg = nights ? total / nights : total;
+
+      document.getElementById('bookingCalc').innerHTML = `
+        <div class="panel">
+          <div><strong>Ночей:</strong> ${nights}</div>
+          <div><strong>Субтотал:</strong> ${fmtMoney(subtotal)}</div>
+          <div><strong>${promo.label || 'Промокод'}:</strong> -${fmtMoney(promo.discount)}</div>
+          <div><strong>${ref.label || 'Реферал'}:</strong> -${fmtMoney(ref.discount)}</div>
+          <div><strong>Итого:</strong> ${fmtMoney(total)}</div>
+          <div><strong>Средняя цена за ночь:</strong> ${fmtMoney(avg)}</div>
+        </div>
+      `;
+    }
+
+    function sendOtp() {
+      const code = String(Math.floor(1000 + Math.random() * 9000));
+      window.bookingVerification.otp = code;
+      toast('SMS-код отправлен: ' + code + ' (демо)');
+    }
+
+    function verifyGuest() {
+      const code = document.getElementById('otpInput').value.trim();
+      const file = document.getElementById('docInput').files[0];
+      if (!window.bookingVerification.otp) {
+        toast('Сначала отправьте SMS-код');
+        return;
+      }
+      if (code !== window.bookingVerification.otp) {
+        toast('Неверный SMS-код');
+        return;
+      }
+      if (!file) {
+        toast('Загрузите документ');
+        return;
+      }
+      window.bookingVerification.verified = true;
+      window.bookingVerification.documentName = file.name;
+      document.getElementById('verifyStatus').textContent = 'Статус: подтвержден (' + file.name + ')';
+      const apartment = APARTMENTS.find((a) => a.id === window.bookingContext?.apartmentId);
+      if (apartment) updateBookingReadiness(apartment);
+      toast('Верификация пройдена');
+    }
+
+    function confirmBooking(apartmentId) {
+      const apartment = APARTMENTS.find((a) => a.id === apartmentId);
+      const start = document.getElementById('bkStart').value;
+      const end = document.getElementById('bkEnd').value;
+      const dates = rangeDates(start, end).map((d) => ymd(d));
+      const nights = dates.length;
+      const validation = bookingValidation(apartment);
+      if (!validation.ok) {
+        toast(validation.message);
+        return;
+      }
+
+      const nightly = dates.map((d) => dynamicNightPrice(apartment, d));
+      const subtotal = nightly.reduce((s, v) => s + v, 0);
+      const promo = applyPromo(subtotal, document.getElementById('bkPromo').value, nights);
+      const ref = applyReferral(subtotal, document.getElementById('bkRef').value);
+      const total = Math.max(0, subtotal - promo.discount - ref.discount);
+
+      const booking = {
+        id: 'BK-' + Date.now(),
+        apartmentId,
+        userId: user().id,
+        name: document.getElementById('bkName').value.trim(),
+        phone: document.getElementById('bkPhone').value.trim(),
+        email: document.getElementById('bkEmail').value.trim(),
+        start,
+        end,
+        nights,
+        dates,
+        paymentMethod: document.getElementById('bkPayment').value,
+        total,
+        promo: document.getElementById('bkPromo').value.trim().toUpperCase(),
+        referral: document.getElementById('bkRef').value.trim().toUpperCase(),
+        verification: { sms: true, document: window.bookingVerification.documentName },
+        createdAt: new Date().toISOString()
+      };
+
+      state.bookings.unshift(booking);
+      state.analytics.leads += 1;
+      if (!state.occupancy[apartmentId]) state.occupancy[apartmentId] = {};
+      dates.forEach((d) => { state.occupancy[apartmentId][d] = booking.name; });
+      saveState();
+
+      document.getElementById('bookingModal').remove();
+      renderDashboard();
+      renderOwner();
+      toast('Бронирование создано: ' + booking.id);
+    }
+
+    function exportCsv() {
+      const headers = ['id','apartmentId','name','phone','email','start','end','nights','paymentMethod','total','promo','referral'];
+      const rows = state.bookings.map((b) => headers.map((h) => (b[h] ?? '')).join(','));
+      const csv = [headers.join(','), ...rows].join('\n');
+      downloadFile(csv, 'report.csv', 'text/csv;charset=utf-8;');
+      toast('CSV экспортирован');
+    }
+
+    function exportXls() {
+      const html = `
+        <table border="1">
+          <tr><th>ID</th><th>Apartment</th><th>Name</th><th>Start</th><th>End</th><th>Nights</th><th>Payment</th><th>Total</th></tr>
+          ${state.bookings.map((b) => `<tr><td>${b.id}</td><td>${b.apartmentId}</td><td>${b.name}</td><td>${b.start}</td><td>${b.end}</td><td>${b.nights}</td><td>${b.paymentMethod}</td><td>${b.total}</td></tr>`).join('')}
+        </table>
+      `;
+      downloadFile(html, 'report.xls', 'application/vnd.ms-excel');
+      toast('Excel экспортирован');
+    }
+
+    function downloadFile(content, filename, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function openAuth(mode = 'login', force = false) {
+      window.authRequired = force;
+      document.getElementById('authModal').classList.add('open');
+      document.getElementById('authClose').style.display = force ? 'none' : 'inline-flex';
+      renderAuthTab(mode);
+    }
+
+    function renderAuthTab(mode) {
+      const container = document.getElementById('authContent');
+      if (mode === 'login') {
+        container.innerHTML = `
+          <form onsubmit="login(event)">
+            <div class="field"><label>Email</label><input id="loginEmail" placeholder="Email"></div>
+            <div class="field"><label>${t('password')}</label><input id="loginPassword" type="password" placeholder="••••••••"></div>
+            <button class="btn btn-primary" style="margin-top:10px; width:100%;" type="submit">${t('loginBtn')}</button>
+          </form>
+        `;
+      } else {
+        container.innerHTML = `
+          <form onsubmit="registerUser(event)">
+            <div class="field"><label>${t('name')}</label><input id="regName" required></div>
+            <div class="field"><label>${t('phone')}</label><input id="regPhone" required></div>
+            <div class="field"><label>Email</label><input id="regEmail" type="email" required></div>
+            <div class="field"><label>${t('password')}</label><input id="regPassword" type="password" required></div>
+            <button class="btn btn-primary" style="margin-top:10px; width:100%;" type="submit">${t('createAccount')}</button>
+          </form>
+        `;
+      }
+    }
+
+    function login(event) {
+      event.preventDefault();
+      const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+      const pass = document.getElementById('loginPassword').value;
+      const found = state.users.find((u) => u.email.toLowerCase() === email && u.password === pass);
+      if (!found) {
+        toast('Неверный логин или пароль');
+        return;
+      }
+      state.sessionUserId = found.id;
+      localStorage.setItem('staydaily-onboarded', '1');
+      saveState();
+      document.getElementById('authModal').classList.remove('open');
+      renderAll();
+      toast('Вход выполнен');
+    }
+
+    function registerUser(event) {
+      event.preventDefault();
+      const u = {
+        id: 'u-' + Date.now(),
+        role: 'guest',
+        name: document.getElementById('regName').value.trim(),
+        phone: document.getElementById('regPhone').value.trim(),
+        email: document.getElementById('regEmail').value.trim(),
+        password: document.getElementById('regPassword').value,
+        referralCode: 'REF' + Math.floor(10000 + Math.random() * 90000)
+      };
+      state.users.push(u);
+      state.sessionUserId = u.id;
+      localStorage.setItem('staydaily-onboarded', '1');
+      saveState();
+      document.getElementById('authModal').classList.remove('open');
+      renderAll();
+      toast('Аккаунт создан');
+    }
+
+    function logout() {
+      state.sessionUserId = null;
+      saveState();
+      renderAll();
+      toast('Вы вышли');
+    }
+
+    function renderAuthButton() {
+      const u = user();
+      const btn = document.getElementById('authBtn');
+      btn.textContent = t('profile');
+      btn.onclick = () => {
+        if (!u) {
+          openAuth('login');
+          return;
+        }
+        pushRoute('#/profile');
+      };
+    }
+
+    function ensureFirstVisitRegistration() {
+      const onboarded = localStorage.getItem('staydaily-onboarded') === '1';
+      if (!onboarded && state.sessionUserId === 'guest') {
+        state.sessionUserId = null;
+        saveState();
+      }
+      // Не открываем принудительно - пусть юзер сам решит
+    }
+
+    function viewApartmentBySlug(slug) {
+      const a = getApartmentBySlug(slug);
+      if (!a) return;
+      viewApartment(a);
+    }
+
+    function renderChat() {
+      const log = document.getElementById('chatLog');
+      log.innerHTML = state.chat.map((m) => `<div class="msg ${m.from === 'me' ? 'me' : 'bot'}">${m.text}</div>`).join('');
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function replyBot(text) {
+      const t = text.toLowerCase();
+      if (t.includes('цена')) return 'Цены динамические: зависят от сезона и дня недели. В карточке бронирования покажем полный расчет.';
+      if (t.includes('документ') || t.includes('вериф')) return 'Для подтверждения брони нужен SMS-код и документ (фото паспорта/ID или PDF).';
+      if (t.includes('скид')) return 'Поддерживаем промокоды и реферальные коды. Попробуйте PROMO10.';
+      if (t.includes('человек') || t.includes('гост')) return 'В каталоге у каждой квартиры указана вместимость и минимальный срок проживания.';
+      return 'Принял. Могу подобрать 2-3 варианта под ваш бюджет и даты. Напишите желаемые даты и бюджет.';
+    }
+
+    function bindChat() {
+      const widget = document.getElementById('chatWidget');
+      const open = () => widget.classList.add('open');
+      const close = () => widget.classList.remove('open');
+      document.getElementById('chatCloseBtn').onclick = close;
+
+      document.getElementById('chatForm').onsubmit = (e) => {
+        e.preventDefault();
+        const input = document.getElementById('chatInput');
+        const text = input.value.trim();
+        if (!text) return;
+        state.chat.push({ from: 'me', text });
+        state.chat.push({ from: 'bot', text: replyBot(text) });
+        input.value = '';
+        saveState();
+        renderChat();
+      };
+
+      renderChat();
+    }
+
+    function renderAll() {
+      const langNode = document.getElementById('langSwitcher');
+      if (langNode) langNode.value = currentLang;
+      document.getElementById('brandTagline').textContent = t('brandTagline');
+      document.getElementById('chatTitle').textContent = t('onlineChat');
+      document.getElementById('chatCloseBtn').textContent = t('close');
+      document.getElementById('chatSendBtn').textContent = t('send');
+      document.getElementById('chatInput').placeholder = t('questionPlaceholder');
+      document.getElementById('lightboxClose').textContent = t('close');
+      document.getElementById('lightboxPrev').textContent = t('prev');
+      document.getElementById('lightboxNext').textContent = t('next');
+      document.getElementById('authClose').textContent = t('close');
+      document.getElementById('authModalTitle').textContent = t('loginTitle');
+      document.getElementById('tabLogin').textContent = t('loginTab');
+      document.getElementById('tabRegister').textContent = t('registerTab');
+
+      renderNav();
+      renderAuthButton();
+      renderHome();
+      renderCatalog();
+      renderDashboard();
+      renderProfile();
+      renderOwner();
+      renderAbout();
+      resolveRoute();
+    }
+
+    // Lightbox bindings
+    document.getElementById('lightboxClose').onclick = () => document.getElementById('lightboxModal').classList.remove('open');
+    document.getElementById('lightboxPrev').onclick = lightboxPrev;
+    document.getElementById('lightboxNext').onclick = lightboxNext;
+
+    // Auth bindings
+    document.getElementById('authClose').onclick = () => {
+      if (window.authRequired) return;
+      document.getElementById('authModal').classList.remove('open');
+    };
+    document.getElementById('tabLogin').onclick = () => renderAuthTab('login');
+    document.getElementById('tabRegister').onclick = () => renderAuthTab('register');
+    document.getElementById('langSwitcher').onchange = (e) => setLanguage(e.target.value);
+
+    window.openLightbox = openLightbox;
+    window.pushRoute = pushRoute;
+    window.viewApartmentBySlug = viewApartmentBySlug;
+    window.openBooking = openBooking;
+    window.sendOtp = sendOtp;
+    window.verifyGuest = verifyGuest;
+    window.confirmBooking = confirmBooking;
+    window.toggleFavorite = toggleFavorite;
+    window.rebookOneClick = rebookOneClick;
+    window.exportCsv = exportCsv;
+    window.exportXls = exportXls;
+    window.login = login;
+    window.registerUser = registerUser;
+    window.openAuth = openAuth;
+    window.logout = logout;
+    window.doSmartSearch = doSmartSearch;
+
+    window.addEventListener('hashchange', () => {
+      resolveRoute();
+      trackVisit(location.hash || '#/home');
+    });
+
+    // PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+
+    bindChat();
+    trackVisit(location.hash || '#/home');
+    renderAll();
+  </script>
+</body>
+</html>
