@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Heart -->
+  <path d="M 256 90 C 220 56 175 56 175 90 C 175 124 220 166 256 200 C 292 166 337 124 337 90 C 337 56 292 56 256 90 Z" fill="#4a4a4a"/>
+  
+  <!-- Left building (small with slanted roof) -->
+  <g>
+    <line x1="107" y1="244" x2="159" y2="244" stroke="#4a4a4a" stroke-width="15" stroke-linecap="round"/>
+    <rect x="115" y="244" width="36" height="140" fill="none" stroke="#4a4a4a" stroke-width="15" stroke-linejoin="round"/>
+    <rect x="128" y="276" width="20" height="26" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="128" y="328" width="20" height="26" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+  </g>
+  
+  <!-- Center building (tall) -->
+  <g>
+    <rect x="205" y="178" width="102" height="206" fill="none" stroke="#4a4a4a" stroke-width="15" stroke-linejoin="round"/>
+    <rect x="222" y="210" width="30" height="36" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="258" y="210" width="30" height="36" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="222" y="276" width="30" height="36" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="258" y="276" width="30" height="36" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="222" y="342" width="30" height="36" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="258" y="342" width="30" height="36" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+  </g>
+  
+  <!-- Right building (medium) -->
+  <g>
+    <rect x="332" y="230" width="71" height="154" fill="none" stroke="#4a4a4a" stroke-width="15" stroke-linejoin="round"/>
+    <rect x="348" y="266" width="25" height="31" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="384" y="266" width="25" height="31" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="348" y="332" width="25" height="31" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+    <rect x="384" y="332" width="25" height="31" fill="none" stroke="#4a4a4a" stroke-width="6"/>
+  </g>
+  
+  <!-- Base line -->
+  <line x1="102" y1="384" x2="410" y2="384" stroke="#4a4a4a" stroke-width="18" stroke-linecap="round"/>
+</svg>

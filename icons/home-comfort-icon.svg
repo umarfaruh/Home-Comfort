@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Heart -->
+  <path d="M 100 35 C 86 22 68 22 68 35 C 68 48 86 65 100 78 C 114 65 132 48 132 35 C 132 22 114 22 100 35 Z" fill="#4a4a4a"/>
+  
+  <!-- Left building (small with slanted roof) -->
+  <g>
+    <line x1="42" y1="95" x2="62" y2="95" stroke="#4a4a4a" stroke-width="6" stroke-linecap="round"/>
+    <rect x="45" y="95" width="14" height="55" fill="none" stroke="#4a4a4a" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="50" y="108" width="8" height="10" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="50" y="128" width="8" height="10" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+  </g>
+  
+  <!-- Center building (tall) -->
+  <g>
+    <rect x="80" y="70" width="40" height="80" fill="none" stroke="#4a4a4a" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="87" y="82" width="12" height="14" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="101" y="82" width="12" height="14" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="87" y="108" width="12" height="14" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="101" y="108" width="12" height="14" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="87" y="134" width="12" height="14" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="101" y="134" width="12" height="14" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+  </g>
+  
+  <!-- Right building (medium) -->
+  <g>
+    <rect x="130" y="90" width="28" height="60" fill="none" stroke="#4a4a4a" stroke-width="6" stroke-linejoin="round"/>
+    <rect x="136" y="104" width="10" height="12" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="150" y="104" width="10" height="12" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="136" y="130" width="10" height="12" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+    <rect x="150" y="130" width="10" height="12" fill="none" stroke="#4a4a4a" stroke-width="2.5"/>
+  </g>
+  
+  <!-- Base line -->
+  <line x1="40" y1="150" x2="160" y2="150" stroke="#4a4a4a" stroke-width="7" stroke-linecap="round"/>
+</svg>
